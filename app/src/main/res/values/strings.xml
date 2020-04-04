@@ -1,3 +1,4 @@
 <resources>
   <string name="app_name">Movies Listing</string>
+  <string name="Name">Name: %1$s</string>
 </resources>

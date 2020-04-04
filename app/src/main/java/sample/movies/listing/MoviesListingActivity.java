@@ -15,7 +15,8 @@ public class MoviesListingActivity extends AppCompatActivity {
 
     getSupportFragmentManager()
         .beginTransaction()
-        .add(R.id.hostFrameLayout, new MoviesListingFragment(),
-            MoviesListingFragment.class.getSimpleName());
+        .replace(R.id.hostFrameLayout, new MoviesListingFragment(),
+            MoviesListingFragment.class.getSimpleName())
+        .commit();
   }
 }
