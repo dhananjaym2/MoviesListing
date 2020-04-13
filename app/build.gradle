@@ -3,6 +3,9 @@ apply plugin: 'com.android.application'
 android {
   compileSdkVersion 29
   buildToolsVersion "29.0.0"
+  dataBinding {
+    enabled = true
+  }
 
   defaultConfig {
     applicationId "sample.movies.listing"
@@ -10,9 +13,6 @@ android {
     targetSdkVersion 29
     versionCode 1
     versionName "1.0"
-    dataBinding {
-      enabled = true
-    }
 
     testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
   }

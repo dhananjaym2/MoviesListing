@@ -5,7 +5,9 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import androidx.annotation.NonNull;
+import androidx.databinding.DataBindingUtil;
 import androidx.fragment.app.Fragment;
+import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -16,6 +18,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import sample.movies.listing.data.MovieItem;
 import sample.movies.listing.data.constants.DataConstants;
+import sample.movies.listing.databinding.FragmentMoviesListingBinding;
 import sample.movies.listing.errorHandling.AppErrorHandler;
 import sample.movies.listing.log.AppLog;
 import sample.movies.listing.util.FileUtils;
@@ -26,13 +29,16 @@ public class MoviesListingFragment extends Fragment {
   //private MoviesRecyclerAdapter moviesRecyclerAdapter;
   private List<MovieItem> movieList;
   private final String logTag = MoviesListingFragment.class.getSimpleName();
+  private FragmentMoviesListingBinding binding;
 
   @Override
   public View onCreateView(LayoutInflater inflater, ViewGroup container,
       Bundle savedInstanceState) {
     // Inflate the layout for this fragment
     AppLog.debug(logTag, "in onCreateView()");
-    return inflater.inflate(R.layout.fragment_movies_listing, container, false);
+    binding = DataBindingUtil.inflate(inflater, R.layout.fragment_movies_listing, container, false);
+    View view = binding.getRoot();
+    return view;
   }
 
   public void onViewCreated(@NonNull View view, Bundle savedInstanceState) {
@@ -60,7 +66,12 @@ public class MoviesListingFragment extends Fragment {
     } catch (JSONException e) {
       new AppErrorHandler(e);
     }
-    // TODO moviesRecyclerView.setAdapter(new MoviesRecyclerAdapter(movieList));
+    MoviesRecyclerAdapter moviesRecyclerAdapter =
+        new MoviesRecyclerAdapter(movieList, getActivity());
+    RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(getActivity());
+    //LinearLayoutManager.VERTICAL
+    moviesRecyclerView.setLayoutManager(layoutManager);
+    binding.moviesRecyclerView.setAdapter(moviesRecyclerAdapter);
   }
 
   private ArrayList<MovieItem> parseJsonFromString(String jsonDataAsString) throws JSONException {
