@@ -43,7 +43,7 @@ class MoviesRecyclerAdapter extends RecyclerView.Adapter<MoviesRecyclerAdapter.V
    */
   @NonNull @Override public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent,
       int viewType) {
-    MovieItemBinding binding =// TODO Check dataType of binding
+    MovieItemBinding binding =
         DataBindingUtil.inflate(LayoutInflater.from(parent.getContext()), R.layout.movie_item,
             parent, false);
     return new ViewHolder(binding);

@@ -1,4 +1,13 @@
 <resources>
   <string name="app_name">Movies Listing</string>
   <string name="Name">Name: %1$s</string>
+  <string name="PosterImage">Poster image</string>
+  <string name="Plan">Plan</string>
+  <string name="ReleaseYear">Release year</string>
+  <string name="Duration">Duration</string>
+  <string name="Type">Type</string>
+  <string name="CreatedOn">Created on :</string>
+  <string name="UpdatedOn">Updated on :</string>
+  <string name="ShortDescription">Short Description</string>
+  <string name="Description">Description</string>
 </resources>
