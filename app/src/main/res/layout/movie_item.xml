@@ -55,7 +55,7 @@
         android:layout_height="wrap_content"
         android:gravity="end"
         android:text="@{Integer.toString(movieItem.release_year)}"
-        android:visibility="@{movieItem.release_year != 0? View.GONE : View.VISIBLE}"
+        android:visibility="@{movieItem.release_year > 0? View.VISIBLE : View.GONE}"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toEndOf="@id/planTextView"
         app:layout_constraintTop_toBottomOf="@id/nameTextView"
