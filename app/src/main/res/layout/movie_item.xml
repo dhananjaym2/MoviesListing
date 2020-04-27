@@ -5,6 +5,8 @@
     >
   <data>
     <import type="sample.movies.listing.data.MovieItem" />
+    <import type="android.text.TextUtils" />
+    <import type="android.view.View" />
     <variable
         name="movieItem"
         type="sample.movies.listing.data.MovieItem"
@@ -41,7 +43,8 @@
         android:id="@+id/planTextView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="@string/Plan"
+        android:text="@{movieItem.payment_plan}"
+        android:visibility="@{TextUtils.isEmpty(movieItem.payment_plan)? View.GONE : View.VISIBLE}"
         app:layout_constraintStart_toEndOf="@id/posterImageView"
         app:layout_constraintTop_toBottomOf="@id/nameTextView"
         />
@@ -51,7 +54,8 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:gravity="end"
-        android:text="@string/ReleaseYear"
+        android:text="@{Integer.toString(movieItem.release_year)}"
+        android:visibility="@{movieItem.release_year != 0? View.GONE : View.VISIBLE}"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toEndOf="@id/planTextView"
         app:layout_constraintTop_toBottomOf="@id/nameTextView"
@@ -61,17 +65,19 @@
         android:id="@+id/durationTextView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="@string/Duration"
+        android:text="@{movieItem.video_duration}"
+        android:visibility="@{TextUtils.isEmpty(movieItem.video_duration)? View.GONE : View.VISIBLE}"
         app:layout_constraintStart_toEndOf="@id/posterImageView"
         app:layout_constraintTop_toBottomOf="@id/planTextView"
         />
 
     <TextView
-        android:id="@+id/TypeTextView"
+        android:id="@+id/typeTextView"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:gravity="end"
-        android:text="@string/Type"
+        android:text="@{movieItem.type}"
+        android:visibility="@{TextUtils.isEmpty(movieItem.type)? View.GONE : View.VISIBLE}"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toEndOf="@id/durationTextView"
         app:layout_constraintTop_toBottomOf="@id/planTextView"
@@ -81,7 +87,8 @@
         android:id="@+id/createdOnTextView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="@string/CreatedOn"
+        android:text="@{movieItem.created_on}"
+        android:visibility="@{TextUtils.isEmpty(movieItem.created_on)? View.GONE : View.VISIBLE}"
         app:layout_constraintStart_toEndOf="@id/posterImageView"
         app:layout_constraintTop_toBottomOf="@id/durationTextView"
         />
@@ -90,7 +97,8 @@
         android:id="@+id/updatedOnTextView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="@string/UpdatedOn"
+        android:text="@{movieItem.updated_on}"
+        android:visibility="@{TextUtils.isEmpty(movieItem.updated_on)? View.GONE : View.VISIBLE}"
         app:layout_constraintStart_toEndOf="@id/posterImageView"
         app:layout_constraintTop_toBottomOf="@id/createdOnTextView"
         />
@@ -99,7 +107,8 @@
         android:id="@+id/shortDescriptionTextView"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:text="@string/ShortDescription"
+        android:text="@{movieItem.shortDescription}"
+        android:visibility="@{TextUtils.isEmpty(movieItem.shortDescription)? View.GONE : View.VISIBLE}"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toEndOf="@id/posterImageView"
         app:layout_constraintTop_toBottomOf="@id/updatedOnTextView"
@@ -109,7 +118,8 @@
         android:id="@+id/descriptionTextView"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="@string/Description"
+        android:text="@{movieItem.description}"
+        android:visibility="@{TextUtils.isEmpty(movieItem.description)? View.GONE : View.VISIBLE}"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/shortDescriptionTextView"
@@ -117,7 +127,7 @@
 
     <View
         android:layout_width="match_parent"
-        android:layout_height="0.5dp"
+        android:layout_height="0.2dp"
         android:layout_marginTop="5dp"
         android:background="@android:color/black"
         app:layout_constraintEnd_toEndOf="parent"
