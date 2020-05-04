@@ -25,7 +25,7 @@ class MoviesRecyclerAdapter extends RecyclerView.Adapter<MoviesRecyclerAdapter.V
   private final int imageHeight;
   private final TiffFileReader tiffFileReader;
 
-  public MoviesRecyclerAdapter(List<MovieItem> movieList, Context context, int imageWidth) {
+  MoviesRecyclerAdapter(List<MovieItem> movieList, Context context, int imageWidth) {
     this.movieList = movieList;
     this.context = context;
     this.imageWidth = imageWidth;
