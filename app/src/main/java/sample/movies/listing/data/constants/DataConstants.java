@@ -2,7 +2,6 @@ package sample.movies.listing.data.constants;
 
 public interface DataConstants {
   String testData = "TestData";
-  String id = "id";
   String name = "name";
   String payment_plan = "payment_plan";
   String release_year = "release_year";

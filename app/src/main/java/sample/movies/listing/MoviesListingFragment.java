@@ -25,7 +25,7 @@ import sample.movies.listing.util.DateTimeUtils;
 import sample.movies.listing.util.DimensionUtils;
 import sample.movies.listing.util.FileUtils;
 
-public class MoviesListingFragment extends Fragment {
+class MoviesListingFragment extends Fragment {
 
   private List<MovieItem> movieList;
   private final String logTag = MoviesListingFragment.class.getSimpleName();
@@ -93,7 +93,6 @@ public class MoviesListingFragment extends Fragment {
 
         movieList.add(
             new MovieItem(
-                movieJsonObject.optInt(DataConstants.id),
                 movieJsonObject.optString(DataConstants.name),
                 movieJsonObject.optString(DataConstants.payment_plan),
                 movieJsonObject.optInt(DataConstants.release_year),

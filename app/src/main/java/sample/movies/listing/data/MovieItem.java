@@ -5,29 +5,27 @@ package sample.movies.listing.data;
  */
 public class MovieItem {
 
-  private int id;
+  private final String name;
 
-  private String name;
+  private final String payment_plan;
 
-  private String payment_plan;
+  private final int release_year;
 
-  private int release_year;
+  private final String video_duration;
 
-  private String video_duration;
+  private final String type;
 
-  private String type;
+  private final String created_on;
 
-  private String created_on;
+  private final String updated_on;
 
-  private String updated_on;
+  private final String posterLink;
 
-  private String posterLink;
+  private final String shortDescription;
 
-  private String shortDescription;
+  private final String description;
 
-  private String description;
-
-  public MovieItem(int id, String name, String payment_plan, int release_year, String
+  public MovieItem(String name, String payment_plan, int release_year, String
       video_duration, String type, String created_on, String updated_on, String posterLink,
       String shortDescription, String description) {
     this.name = name;
@@ -42,91 +40,43 @@ public class MovieItem {
     this.description = description;
   }
 
-  public int getId() {
-    return id;
-  }
-
-  public void setId(int id) {
-    this.id = id;
-  }
-
   public String getName() {
     return name;
-  }
-
-  public void setName(String name) {
-    this.name = name;
   }
 
   public String getPayment_plan() {
     return payment_plan;
   }
 
-  public void setPayment_plan(String payment_plan) {
-    this.payment_plan = payment_plan;
-  }
-
   public int getRelease_year() {
     return release_year;
-  }
-
-  public void setRelease_year(int release_year) {
-    this.release_year = release_year;
   }
 
   public String getVideo_duration() {
     return video_duration;
   }
 
-  public void setVideo_duration(String video_duration) {
-    this.video_duration = video_duration;
-  }
-
   public String getType() {
     return type;
-  }
-
-  public void setType(String type) {
-    this.type = type;
   }
 
   public String getCreated_on() {
     return created_on;
   }
 
-  public void setCreated_on(String created_on) {
-    this.created_on = created_on;
-  }
-
   public String getUpdated_on() {
     return updated_on;
-  }
-
-  public void setUpdated_on(String updated_on) {
-    this.updated_on = updated_on;
   }
 
   public String getPosterLink() {
     return posterLink;
   }
 
-  public void setPosterLink(String posterLink) {
-    this.posterLink = posterLink;
-  }
-
   public String getShortDescription() {
     return shortDescription;
   }
 
-  public void setShortDescription(String shortDescription) {
-    this.shortDescription = shortDescription;
-  }
-
   public String getDescription() {
     return description;
-  }
-
-  public void setDescription(String description) {
-    this.description = description;
   }
 }

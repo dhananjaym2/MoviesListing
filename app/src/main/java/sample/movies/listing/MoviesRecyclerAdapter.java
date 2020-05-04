@@ -19,11 +19,11 @@ import sample.movies.listing.util.FileUtils;
 import sample.movies.listing.util.TiffFileReader;
 
 class MoviesRecyclerAdapter extends RecyclerView.Adapter<MoviesRecyclerAdapter.ViewHolder> {
-  private List<MovieItem> movieList;
-  private Context context;
-  private int imageWidth;
-  private int imageHeight;
-  private TiffFileReader tiffFileReader;
+  private final List<MovieItem> movieList;
+  private final Context context;
+  private final int imageWidth;
+  private final int imageHeight;
+  private final TiffFileReader tiffFileReader;
 
   public MoviesRecyclerAdapter(List<MovieItem> movieList, Context context, int imageWidth) {
     this.movieList = movieList;
@@ -126,9 +126,9 @@ class MoviesRecyclerAdapter extends RecyclerView.Adapter<MoviesRecyclerAdapter.V
 
   static class ViewHolder extends RecyclerView.ViewHolder {
 
-    MovieItemBinding itemRowBinding;
-    ConstraintLayout movieItemParentConstraintLayout;
-    ImageView posterImageView;
+    final MovieItemBinding itemRowBinding;
+    final ConstraintLayout movieItemParentConstraintLayout;
+    final ImageView posterImageView;
 
     ViewHolder(@NonNull MovieItemBinding itemRowBinding) {
       super(itemRowBinding.getRoot());
