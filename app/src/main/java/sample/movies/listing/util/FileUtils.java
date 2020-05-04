@@ -29,7 +29,7 @@ public class FileUtils {
 
   public static File getFileFromAssets(Context context, String fileName) {
     AssetManager am = context.getAssets();
-    InputStream inputStream = null;
+    InputStream inputStream;
     try {
       inputStream = am.open("img/" + "TestImage.tif");// same file is used TestImage.tif
       //context.getExternalFilesDir(null)
@@ -48,7 +48,7 @@ public class FileUtils {
       if (!f.exists()) {
         OutputStream outputStream = new FileOutputStream(f);
         byte[] buffer = new byte[1024];
-        int length = 0;
+        int length;
 
         while ((length = inputStream.read(buffer)) > 0) {
           outputStream.write(buffer, 0, length);

@@ -124,7 +124,7 @@ class MoviesRecyclerAdapter extends RecyclerView.Adapter<MoviesRecyclerAdapter.V
     return 0;
   }
 
-  class ViewHolder extends RecyclerView.ViewHolder {
+  static class ViewHolder extends RecyclerView.ViewHolder {
 
     MovieItemBinding itemRowBinding;
     ConstraintLayout movieItemParentConstraintLayout;

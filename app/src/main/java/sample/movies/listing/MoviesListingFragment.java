@@ -27,27 +27,22 @@ import sample.movies.listing.util.FileUtils;
 
 public class MoviesListingFragment extends Fragment {
 
-  private RecyclerView moviesRecyclerView;
-  //private MoviesRecyclerAdapter moviesRecyclerAdapter;
   private List<MovieItem> movieList;
   private final String logTag = MoviesListingFragment.class.getSimpleName();
   private FragmentMoviesListingBinding binding;
 
   @Override
-  public View onCreateView(LayoutInflater inflater, ViewGroup container,
+  public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
       Bundle savedInstanceState) {
     // Inflate the layout for this fragment
-    AppLog.debug(logTag, "in onCreateView()");
     binding = DataBindingUtil.inflate(inflater, R.layout.fragment_movies_listing, container, false);
-    View view = binding.getRoot();
-    return view;
+    return binding.getRoot();
   }
 
   public void onViewCreated(@NonNull View view, Bundle savedInstanceState) {
-    AppLog.debug(logTag, "in onViewCreated()");
     super.onViewCreated(view, savedInstanceState);
 
-    moviesRecyclerView = view.findViewById(R.id.moviesRecyclerView);
+    RecyclerView moviesRecyclerView = view.findViewById(R.id.moviesRecyclerView);
 
     String dataAsStringFromAssets = null;
     try {

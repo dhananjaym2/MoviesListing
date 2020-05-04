@@ -31,10 +31,9 @@
         android:layout_height="wrap_content"
         android:layout_marginBottom="@dimen/defaultSmallMarginForViewsInMovieItem"
         android:text="@{movieItem.name}"
-        android:textAppearance="@android:style/TextAppearance.DeviceDefault.Medium"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        tools:text="Name: Avengers"
+        tools:text="@string/Name"
         />
 
     <ImageView
@@ -58,6 +57,7 @@
         android:visibility="@{TextUtils.isEmpty(movieItem.payment_plan)? View.GONE : View.VISIBLE}"
         app:layout_constraintStart_toEndOf="@id/posterImageView"
         app:layout_constraintTop_toBottomOf="@id/nameTextView"
+        tools:text="@string/Plan"
         />
 
     <TextView
@@ -72,6 +72,7 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toEndOf="@id/planTextView"
         app:layout_constraintTop_toBottomOf="@id/nameTextView"
+        tools:text="@string/ReleaseYear"
         />
 
     <androidx.constraintlayout.widget.Barrier
@@ -94,6 +95,7 @@
         android:visibility="@{TextUtils.isEmpty(movieItem.video_duration)? View.GONE : View.VISIBLE}"
         app:layout_constraintStart_toEndOf="@id/posterImageView"
         app:layout_constraintTop_toBottomOf="@id/durationAndTypeBarrier"
+        tools:text="@string/Duration"
         />
 
     <TextView
@@ -108,6 +110,7 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toEndOf="@id/durationTextView"
         app:layout_constraintTop_toBottomOf="@id/durationAndTypeBarrier"
+        tools:text="@string/Type"
         />
 
     <androidx.constraintlayout.widget.Barrier
@@ -130,6 +133,7 @@
         android:visibility="@{TextUtils.isEmpty(movieItem.created_on)? View.GONE : View.VISIBLE}"
         app:layout_constraintStart_toEndOf="@id/posterImageView"
         app:layout_constraintTop_toBottomOf="@id/createdAndUpdatedOnBarrier"
+        tools:text="@string/CreatedOn"
         />
 
     <TextView
@@ -144,6 +148,7 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toEndOf="@id/createdOnTextView"
         app:layout_constraintTop_toBottomOf="@id/createdAndUpdatedOnBarrier"
+        tools:text="@string/UpdatedOn"
         />
 
     <androidx.constraintlayout.widget.Barrier
@@ -167,6 +172,7 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toEndOf="@id/posterImageView"
         app:layout_constraintTop_toBottomOf="@id/shortDescriptionBarrier"
+        tools:text="@string/ShortDescription"
         />
 
     <androidx.constraintlayout.widget.Barrier
@@ -188,6 +194,7 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/descriptionBarrier"
+        tools:text="@string/Description"
         />
 
     <View

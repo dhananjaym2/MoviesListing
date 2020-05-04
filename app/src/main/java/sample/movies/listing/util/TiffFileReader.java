@@ -20,7 +20,6 @@ public class TiffFileReader {
     for (int i = 0; i < dirCount; i++) {
       options.inDirectoryNumber = i;
       TiffBitmapFactory.decodeFile(file, options);
-      int curDir = options.outCurDirectoryNumber;
       int width = options.outWidth;
       int height = options.outHeight;
       //Change sample size if width or height bigger than required width or height
