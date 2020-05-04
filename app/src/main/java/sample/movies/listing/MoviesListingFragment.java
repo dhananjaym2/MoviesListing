@@ -25,7 +25,7 @@ import sample.movies.listing.util.DateTimeUtils;
 import sample.movies.listing.util.DimensionUtils;
 import sample.movies.listing.util.FileUtils;
 
-class MoviesListingFragment extends Fragment {
+public class MoviesListingFragment extends Fragment {
 
   private List<MovieItem> movieList;
   private final String logTag = MoviesListingFragment.class.getSimpleName();
