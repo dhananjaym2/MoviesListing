@@ -21,6 +21,8 @@ import sample.movies.listing.data.constants.DataConstants;
 import sample.movies.listing.databinding.FragmentMoviesListingBinding;
 import sample.movies.listing.errorHandling.AppErrorHandler;
 import sample.movies.listing.log.AppLog;
+import sample.movies.listing.util.DateTimeUtils;
+import sample.movies.listing.util.DimensionUtils;
 import sample.movies.listing.util.FileUtils;
 
 public class MoviesListingFragment extends Fragment {
@@ -67,11 +69,15 @@ public class MoviesListingFragment extends Fragment {
       new AppErrorHandler(e);
     }
     MoviesRecyclerAdapter moviesRecyclerAdapter =
-        new MoviesRecyclerAdapter(movieList, getActivity());
-    RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(getActivity());
-    //LinearLayoutManager.VERTICAL
+        new MoviesRecyclerAdapter(movieList, getActivity(), getImageViewWidth());
+    RecyclerView.LayoutManager layoutManager =
+        new LinearLayoutManager(getActivity(), LinearLayoutManager.VERTICAL, false);
     moviesRecyclerView.setLayoutManager(layoutManager);
     binding.moviesRecyclerView.setAdapter(moviesRecyclerAdapter);
+  }
+
+  private int getImageViewWidth() {
+    return DimensionUtils.getDeviceWidth(requireActivity()) / 2;
   }
 
   private ArrayList<MovieItem> parseJsonFromString(String jsonDataAsString) throws JSONException {
@@ -89,6 +95,7 @@ public class MoviesListingFragment extends Fragment {
 
       for (int index = 0; index < jsonArray.length(); index++) {
         JSONObject movieJsonObject = jsonArray.optJSONObject(index);
+
         movieList.add(
             new MovieItem(
                 movieJsonObject.optInt(DataConstants.id),
@@ -97,8 +104,10 @@ public class MoviesListingFragment extends Fragment {
                 movieJsonObject.optInt(DataConstants.release_year),
                 movieJsonObject.optString(DataConstants.video_duration),
                 movieJsonObject.optString(DataConstants.type),
-                movieJsonObject.optString(DataConstants.created_on),
-                movieJsonObject.optString(DataConstants.updated_on),
+                DateTimeUtils.getDateFromTimeString(
+                    movieJsonObject.optString(DataConstants.created_on)),
+                DateTimeUtils.getDateFromTimeString(
+                    movieJsonObject.optString(DataConstants.updated_on)),
                 movieJsonObject.optString(DataConstants.posterLink),
                 movieJsonObject.optString(DataConstants.shortDescription),
                 movieJsonObject.optString(DataConstants.description)

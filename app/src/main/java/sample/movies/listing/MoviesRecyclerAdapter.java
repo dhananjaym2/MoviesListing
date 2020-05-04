@@ -4,21 +4,33 @@ import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.ListView;
 import androidx.annotation.NonNull;
+import androidx.constraintlayout.widget.ConstraintLayout;
+import androidx.constraintlayout.widget.ConstraintSet;
 import androidx.databinding.DataBindingUtil;
 import androidx.recyclerview.widget.RecyclerView;
 import java.util.List;
+import java.util.Objects;
 import sample.movies.listing.data.MovieItem;
 import sample.movies.listing.databinding.MovieItemBinding;
+import sample.movies.listing.util.FileUtils;
+import sample.movies.listing.util.TiffFileReader;
 
 class MoviesRecyclerAdapter extends RecyclerView.Adapter<MoviesRecyclerAdapter.ViewHolder> {
   private List<MovieItem> movieList;
   private Context context;
+  private int imageWidth;
+  private int imageHeight;
+  private TiffFileReader tiffFileReader;
 
-  public MoviesRecyclerAdapter(List<MovieItem> movieList, Context context) {
+  public MoviesRecyclerAdapter(List<MovieItem> movieList, Context context, int imageWidth) {
     this.movieList = movieList;
     this.context = context;
+    this.imageWidth = imageWidth;
+    imageHeight = (int) (imageWidth * 0.94); // 4828 / 5181 = 0.94
+    tiffFileReader = new TiffFileReader();
   }
 
   /**
@@ -71,7 +83,33 @@ class MoviesRecyclerAdapter extends RecyclerView.Adapter<MoviesRecyclerAdapter.V
    */
   @Override public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
     MovieItem movieItem = movieList.get(position);
+    ConstraintSet constraintSet = new ConstraintSet();
+    //constraintSet.connect(R.id.nameTextView, ConstraintSet.BOTTOM, R.id.posterImageView,
+    //    ConstraintSet.TOP);
+    constraintSet.connect(R.id.posterImageView, ConstraintSet.TOP, R.id.nameTextView,
+        ConstraintSet.BOTTOM/*, 0*/);
+    //constraintSet.connect(R.id.posterImageView, ConstraintSet.START, ConstraintSet.PARENT_ID,
+    //    ConstraintSet.START);
+    //constraintSet.connect(R.id.posterImageView, ConstraintSet.BOTTOM, R.id.nameTextView,
+    //    ConstraintSet.TOP);
+    //constraintSet.connect(R.id.posterImageView, ConstraintSet.START, ConstraintSet.PARENT_ID,
+    //    ConstraintSet.START);
+    constraintSet.applyTo(
+        holder.movieItemParentConstraintLayout);//IllegalArgumentException: right to top undefined
+    ConstraintLayout.LayoutParams layoutParams = new ConstraintLayout.LayoutParams(imageWidth,
+        ViewGroup.LayoutParams.WRAP_CONTENT);
+    //layoutParams.topMargin = 100;
+    //layoutParams.constraintTopToBottomOf()
+    holder.posterImageView.setLayoutParams(layoutParams);
+    // TODO read the bitmap on non UI thread.
+    holder.posterImageView.setImageBitmap(tiffFileReader.read(
+        getFilePath(movieItem.getPosterLink()), imageWidth, imageHeight));
     holder.bind(movieItem);
+  }
+
+  private String getFilePath(String posterLink) {
+    return Objects.requireNonNull(FileUtils.getFileFromAssets(context, posterLink))
+        .getAbsolutePath();
   }
 
   /**
@@ -89,11 +127,14 @@ class MoviesRecyclerAdapter extends RecyclerView.Adapter<MoviesRecyclerAdapter.V
   class ViewHolder extends RecyclerView.ViewHolder {
 
     MovieItemBinding itemRowBinding;
-    //TextView nameTextView;
+    ConstraintLayout movieItemParentConstraintLayout;
+    ImageView posterImageView;
 
     ViewHolder(@NonNull MovieItemBinding itemRowBinding) {
       super(itemRowBinding.getRoot());
       this.itemRowBinding = itemRowBinding;
+      movieItemParentConstraintLayout = itemRowBinding.movieItemParentConstraintLayout;
+      posterImageView = itemRowBinding.posterImageView;
     }
 
     void bind(Object object) {

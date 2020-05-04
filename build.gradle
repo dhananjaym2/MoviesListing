@@ -25,3 +25,7 @@ allprojects {
 task clean(type: Delete) {
   delete rootProject.buildDir
 }
+
+ext {
+  tiffBitmapLibVer = "0.9.8.7"
+}

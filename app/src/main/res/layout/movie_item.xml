@@ -11,19 +11,27 @@
         name="movieItem"
         type="sample.movies.listing.data.MovieItem"
         />
+    <variable
+        name="deviceWidth"
+        type="Integer"
+        />
   </data>
   <androidx.constraintlayout.widget.ConstraintLayout
+      android:id="@+id/movieItemParentConstraintLayout"
       android:layout_width="match_parent"
       android:layout_height="wrap_content"
+      android:layout_marginStart="@dimen/defaultSmallMarginForViewsInMovieItem"
+      android:layout_marginTop="@dimen/defaultSmallMarginForViewsInMovieItem"
+      android:layout_marginEnd="@dimen/defaultSmallMarginForViewsInMovieItem"
       >
 
     <TextView
         android:id="@+id/nameTextView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="5dp"
-        android:layout_marginBottom="5dp"
+        android:layout_marginBottom="@dimen/defaultSmallMarginForViewsInMovieItem"
         android:text="@{movieItem.name}"
+        android:textAppearance="@android:style/TextAppearance.DeviceDefault.Medium"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         tools:text="Name: Avengers"
@@ -31,18 +39,21 @@
 
     <ImageView
         android:id="@+id/posterImageView"
-        android:layout_width="0dp"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/defaultSmallMarginForViewsInMovieItem"
         android:contentDescription="@string/PosterImage"
-        android:src="@mipmap/ic_launcher"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/nameTextView"
+        tools:src="@mipmap/ic_launcher"
         />
 
     <TextView
         android:id="@+id/planTextView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/defaultSmallMarginForViewsInMovieItem"
+        android:layout_marginTop="@dimen/defaultSmallMarginForViewsInMovieItem"
         android:text="@{movieItem.payment_plan}"
         android:visibility="@{TextUtils.isEmpty(movieItem.payment_plan)? View.GONE : View.VISIBLE}"
         app:layout_constraintStart_toEndOf="@id/posterImageView"
@@ -53,6 +64,8 @@
         android:id="@+id/releaseYearTextView"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/defaultSmallMarginForViewsInMovieItem"
+        android:layout_marginTop="@dimen/defaultSmallMarginForViewsInMovieItem"
         android:gravity="end"
         android:text="@{Integer.toString(movieItem.release_year)}"
         android:visibility="@{movieItem.release_year > 0? View.VISIBLE : View.GONE}"
@@ -61,74 +74,127 @@
         app:layout_constraintTop_toBottomOf="@id/nameTextView"
         />
 
+    <androidx.constraintlayout.widget.Barrier
+        android:id="@+id/durationAndTypeBarrier"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:barrierAllowsGoneWidgets="true"
+        app:barrierDirection="bottom"
+        app:constraint_referenced_ids="planTextView,releaseYearTextView"
+        app:layout_constraintTop_toBottomOf="@+id/planTextView"
+        />
+
     <TextView
         android:id="@+id/durationTextView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/defaultSmallMarginForViewsInMovieItem"
+        android:layout_marginTop="@dimen/defaultSmallMarginForViewsInMovieItem"
         android:text="@{movieItem.video_duration}"
         android:visibility="@{TextUtils.isEmpty(movieItem.video_duration)? View.GONE : View.VISIBLE}"
         app:layout_constraintStart_toEndOf="@id/posterImageView"
-        app:layout_constraintTop_toBottomOf="@id/planTextView"
+        app:layout_constraintTop_toBottomOf="@id/durationAndTypeBarrier"
         />
 
     <TextView
         android:id="@+id/typeTextView"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/defaultSmallMarginForViewsInMovieItem"
+        android:layout_marginTop="@dimen/defaultSmallMarginForViewsInMovieItem"
         android:gravity="end"
         android:text="@{movieItem.type}"
         android:visibility="@{TextUtils.isEmpty(movieItem.type)? View.GONE : View.VISIBLE}"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toEndOf="@id/durationTextView"
-        app:layout_constraintTop_toBottomOf="@id/planTextView"
+        app:layout_constraintTop_toBottomOf="@id/durationAndTypeBarrier"
+        />
+
+    <androidx.constraintlayout.widget.Barrier
+        android:id="@+id/createdAndUpdatedOnBarrier"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:barrierAllowsGoneWidgets="true"
+        app:barrierDirection="bottom"
+        app:constraint_referenced_ids="durationTextView,typeTextView"
+        app:layout_constraintTop_toBottomOf="@+id/durationTextView"
         />
 
     <TextView
         android:id="@+id/createdOnTextView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/defaultSmallMarginForViewsInMovieItem"
+        android:layout_marginTop="@dimen/defaultSmallMarginForViewsInMovieItem"
         android:text="@{movieItem.created_on}"
         android:visibility="@{TextUtils.isEmpty(movieItem.created_on)? View.GONE : View.VISIBLE}"
         app:layout_constraintStart_toEndOf="@id/posterImageView"
-        app:layout_constraintTop_toBottomOf="@id/durationTextView"
+        app:layout_constraintTop_toBottomOf="@id/createdAndUpdatedOnBarrier"
         />
 
     <TextView
         android:id="@+id/updatedOnTextView"
-        android:layout_width="wrap_content"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/defaultSmallMarginForViewsInMovieItem"
+        android:layout_marginTop="@dimen/defaultSmallMarginForViewsInMovieItem"
+        android:gravity="end"
         android:text="@{movieItem.updated_on}"
         android:visibility="@{TextUtils.isEmpty(movieItem.updated_on)? View.GONE : View.VISIBLE}"
-        app:layout_constraintStart_toEndOf="@id/posterImageView"
-        app:layout_constraintTop_toBottomOf="@id/createdOnTextView"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@id/createdOnTextView"
+        app:layout_constraintTop_toBottomOf="@id/createdAndUpdatedOnBarrier"
+        />
+
+    <androidx.constraintlayout.widget.Barrier
+        android:id="@+id/shortDescriptionBarrier"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:barrierAllowsGoneWidgets="true"
+        app:barrierDirection="bottom"
+        app:constraint_referenced_ids="createdOnTextView,updatedOnTextView"
+        app:layout_constraintTop_toBottomOf="@+id/createdOnTextView"
         />
 
     <TextView
         android:id="@+id/shortDescriptionTextView"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/defaultSmallMarginForViewsInMovieItem"
+        android:layout_marginTop="@dimen/defaultSmallMarginForViewsInMovieItem"
         android:text="@{movieItem.shortDescription}"
         android:visibility="@{TextUtils.isEmpty(movieItem.shortDescription)? View.GONE : View.VISIBLE}"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toEndOf="@id/posterImageView"
-        app:layout_constraintTop_toBottomOf="@id/updatedOnTextView"
+        app:layout_constraintTop_toBottomOf="@id/shortDescriptionBarrier"
+        />
+
+    <androidx.constraintlayout.widget.Barrier
+        android:id="@+id/descriptionBarrier"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:barrierDirection="bottom"
+        app:constraint_referenced_ids="shortDescriptionTextView,posterImageView"
+        app:layout_constraintTop_toBottomOf="@+id/shortDescriptionTextView"
         />
 
     <TextView
         android:id="@+id/descriptionTextView"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/defaultSmallMarginForViewsInMovieItem"
         android:text="@{movieItem.description}"
         android:visibility="@{TextUtils.isEmpty(movieItem.description)? View.GONE : View.VISIBLE}"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/shortDescriptionTextView"
+        app:layout_constraintTop_toBottomOf="@id/descriptionBarrier"
         />
 
     <View
+        android:id="@+id/separatorView"
         android:layout_width="match_parent"
-        android:layout_height="0.2dp"
-        android:layout_marginTop="5dp"
+        android:layout_height="@dimen/separatorViewHeightInMovieItem"
+        android:layout_marginTop="@dimen/defaultSmallMarginForViewsInMovieItem"
         android:background="@android:color/black"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
