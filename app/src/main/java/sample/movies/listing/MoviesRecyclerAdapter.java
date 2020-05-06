@@ -7,14 +7,26 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.ListView;
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.constraintlayout.widget.ConstraintSet;
 import androidx.databinding.DataBindingUtil;
 import androidx.recyclerview.widget.RecyclerView;
+import java.lang.ref.WeakReference;
+import java.util.Collection;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
+import java.util.Queue;
+import java.util.concurrent.Callable;
+import rx.Single;
+import rx.android.schedulers.AndroidSchedulers;
+import rx.functions.Action1;
+import rx.schedulers.Schedulers;
 import sample.movies.listing.data.MovieItem;
 import sample.movies.listing.databinding.MovieItemBinding;
+import sample.movies.listing.log.AppLog;
+import sample.movies.listing.pojo.IndexWithBitmap;
 import sample.movies.listing.util.FileUtils;
 import sample.movies.listing.util.TiffFileReader;
 
@@ -24,6 +36,9 @@ class MoviesRecyclerAdapter extends RecyclerView.Adapter<MoviesRecyclerAdapter.V
   private final int imageWidth;
   private final int imageHeight;
   private final TiffFileReader tiffFileReader;
+  private final String logTag = this.getClass().getSimpleName();
+  private WeakReference<MoviesListingActivity> activityReference;
+  private Queue<Integer> loadMediaQueue;
 
   MoviesRecyclerAdapter(List<MovieItem> movieList, Context context, int imageWidth) {
     this.movieList = movieList;
@@ -31,6 +46,80 @@ class MoviesRecyclerAdapter extends RecyclerView.Adapter<MoviesRecyclerAdapter.V
     this.imageWidth = imageWidth;
     imageHeight = (int) (imageWidth * 0.94); // 4828 / 5181 = 0.94
     tiffFileReader = new TiffFileReader();
+    activityReference = new WeakReference<>((MoviesListingActivity) context);
+    loadMediaQueue = new Queue<Integer>() {
+      @Override public boolean add(Integer integer) {
+        return false;
+      }
+
+      @Override public boolean offer(Integer integer) {
+        return false;
+      }
+
+      @Override public Integer remove() {
+        return null;
+      }
+
+      @Nullable @Override public Integer poll() {
+        return null;
+      }
+
+      @Override public Integer element() {
+        return null;
+      }
+
+      @Nullable @Override public Integer peek() {
+        return null;
+      }
+
+      @Override public int size() {
+        return 0;
+      }
+
+      @Override public boolean isEmpty() {
+        return false;
+      }
+
+      @Override public boolean contains(@Nullable Object o) {
+        return false;
+      }
+
+      @NonNull @Override public Iterator<Integer> iterator() {
+        return null;
+      }
+
+      @NonNull @Override public Object[] toArray() {
+        return new Object[0];
+      }
+
+      @NonNull @Override public <T> T[] toArray(@NonNull T[] ts) {
+        return null;
+      }
+
+      @Override public boolean remove(@Nullable Object o) {
+        return false;
+      }
+
+      @Override public boolean containsAll(@NonNull Collection<?> collection) {
+        return false;
+      }
+
+      @Override public boolean addAll(@NonNull Collection<? extends Integer> collection) {
+        return false;
+      }
+
+      @Override public boolean removeAll(@NonNull Collection<?> collection) {
+        return false;
+      }
+
+      @Override public boolean retainAll(@NonNull Collection<?> collection) {
+        return false;
+      }
+
+      @Override public void clear() {
+
+      }
+    };
   }
 
   /**
@@ -82,7 +171,7 @@ class MoviesRecyclerAdapter extends RecyclerView.Adapter<MoviesRecyclerAdapter.V
    * @param position The position of the item within the adapter's data set.
    */
   @Override public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
-    MovieItem movieItem = movieList.get(position);
+    final MovieItem movieItem = movieList.get(position);
     ConstraintSet constraintSet = new ConstraintSet();
     //constraintSet.connect(R.id.nameTextView, ConstraintSet.BOTTOM, R.id.posterImageView,
     //    ConstraintSet.TOP);
@@ -94,17 +183,53 @@ class MoviesRecyclerAdapter extends RecyclerView.Adapter<MoviesRecyclerAdapter.V
     //    ConstraintSet.TOP);
     //constraintSet.connect(R.id.posterImageView, ConstraintSet.START, ConstraintSet.PARENT_ID,
     //    ConstraintSet.START);
+    //constraintSet.connect(R.id.nameTextView, ConstraintSet.TOP, ConstraintSet.PARENT_ID,
+    //    ConstraintSet.TOP);
     constraintSet.applyTo(
         holder.movieItemParentConstraintLayout);//IllegalArgumentException: right to top undefined
     ConstraintLayout.LayoutParams layoutParams = new ConstraintLayout.LayoutParams(imageWidth,
-        ViewGroup.LayoutParams.WRAP_CONTENT);
+        imageHeight);
     //layoutParams.topMargin = 100;
     //layoutParams.constraintTopToBottomOf()
     holder.posterImageView.setLayoutParams(layoutParams);
-    // TODO read the bitmap on non UI thread.
-    holder.posterImageView.setImageBitmap(tiffFileReader.read(
-        getFilePath(movieItem.getPosterLink()), imageWidth, imageHeight));
+    // set a unique tag for each item.
+    holder.posterImageView.setTag(position);
+    //loadMediaQueue.add(position);
+    // clear previous image.
+    holder.posterImageView.setImageBitmap(null);
+    // read the bitmap asynchronously on non UI thread and later set it in the image view
+    fetchImageBitmap(holder, position, movieItem);
     holder.bind(movieItem);
+  }
+
+  private void fetchImageBitmap(@NonNull final ViewHolder holder, final int position,
+      final MovieItem movieItem) {
+    Single.fromCallable(new Callable<Object>() {
+      @Override public Object call() throws Exception {
+        return new IndexWithBitmap(position, tiffFileReader.read(
+            getFilePath(movieItem.getPosterLink()), imageWidth, imageHeight));
+      }
+    }).subscribeOn(Schedulers.computation())
+        .observeOn(AndroidSchedulers.mainThread())
+        .subscribe(
+            new Action1<Object>() {
+              @Override public void call(Object object) {
+                if (object instanceof IndexWithBitmap) {
+                  IndexWithBitmap indexWithBitmapObj = (IndexWithBitmap) object;
+                  if (indexWithBitmapObj.getIndexPosition()
+                      == (int) holder.posterImageView.getTag()) {
+                    // correct bitmap is for this position, so we can show it.
+                    holder.posterImageView.setImageBitmap(((IndexWithBitmap) object).getBitmap());
+                  } else {
+                    AppLog.debug(logTag, "Position doesn't match of received" +
+                        " indexWithBitmapObj with current value of holder.posterImageView.getTag()");
+                  }
+                } else {
+                  AppLog.debug(logTag, "Received object is NOT an instance of IndexWithBitmap");
+                }
+              }
+            }
+        );
   }
 
   private String getFilePath(String posterLink) {

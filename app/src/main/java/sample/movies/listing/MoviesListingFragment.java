@@ -28,7 +28,7 @@ import sample.movies.listing.util.FileUtils;
 public class MoviesListingFragment extends Fragment {
 
   private List<MovieItem> movieList;
-  private final String logTag = MoviesListingFragment.class.getSimpleName();
+  private final String logTag = this.getClass().getSimpleName();
   private FragmentMoviesListingBinding binding;
 
   @Override

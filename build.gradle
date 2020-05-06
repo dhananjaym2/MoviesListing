@@ -28,4 +28,5 @@ task clean(type: Delete) {
 
 ext {
   tiffBitmapLibVer = "0.9.8.7"
+  rxAndroidLibVer = "1.2.0"
 }
