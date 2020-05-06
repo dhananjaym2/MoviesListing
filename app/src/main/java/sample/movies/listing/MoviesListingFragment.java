@@ -12,13 +12,13 @@ import androidx.recyclerview.widget.RecyclerView;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
-import java.util.concurrent.Callable;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import rx.Single;
-import rx.android.schedulers.AndroidSchedulers;
-import rx.functions.Action1;
+import rx.Observable;
+import rx.Observer;
+import rx.Subscriber;
+import rx.Subscription;
 import rx.schedulers.Schedulers;
 import sample.movies.listing.data.MovieItem;
 import sample.movies.listing.data.constants.DataConstants;
@@ -36,6 +36,7 @@ public class MoviesListingFragment extends Fragment {
   private FragmentMoviesListingBinding binding;
   private RecyclerView moviesRecyclerView;
   private MoviesRecyclerAdapter moviesRecyclerAdapter;
+  private Subscription subscription;
 
   @Override
   public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
@@ -63,43 +64,66 @@ public class MoviesListingFragment extends Fragment {
   }
 
   private void fetchData() {
-    Single.fromCallable(new Callable<ArrayList<MovieItem>>() {
-      @Override public ArrayList<MovieItem> call() {
-        String dataAsStringFromAssets = null;
-        if (getActivity() != null) {
-          try {
-            dataAsStringFromAssets = FileUtils.readFileFromAssetsAsAString(getActivity(),
-                "json/TestJSON.json", StandardCharsets.UTF_8);
-          } catch (IOException e) {
-            new AppErrorHandler(e);
-          }
-        } else {
-          AppLog.error(logTag, "getActivity() returns null");
-        }
 
-        try {
-          if (dataAsStringFromAssets != null) {
-            return parseJsonFromString(dataAsStringFromAssets);
-          }
-        } catch (JSONException e) {
-          new AppErrorHandler(e);
-        }
-        return null;
-      }
-    }).subscribeOn(Schedulers.io())
-        .observeOn(AndroidSchedulers.mainThread())
-        .subscribe(
-            new Action1<ArrayList<MovieItem>>() {
-              @Override public void call(ArrayList<MovieItem> movieItemsList) {
-                if (movieItemsList != null) {
-                  movieList = movieItemsList;
-                  moviesRecyclerAdapter.notifyDataSetChanged();
-                } else {
-                  AppLog.debug(logTag, "Received movieItemsList is null");
+    Observable<ArrayList<MovieItem>> observable =
+        Observable.create(new Observable.OnSubscribe<ArrayList<MovieItem>>() {
+          @Override public void call(Subscriber<? super ArrayList<MovieItem>> subscriber) {
+            String dataAsStringFromAssets = null;
+            if (getActivity() != null) {
+              try {
+                dataAsStringFromAssets = FileUtils.readFileFromAssetsAsAString(getActivity(),
+                    "json/TestJSON.json", StandardCharsets.UTF_8);
+              } catch (IOException e) {
+                new AppErrorHandler(e);
+              }
+            } else {
+              AppLog.error(logTag, "getActivity() returns null");
+            }
+
+            try {
+              if (dataAsStringFromAssets != null) {
+                if (!subscriber.isUnsubscribed()) {
+                  AppLog.debug(logTag, "emit next result");
+                  subscriber.onNext(parseJsonFromString(dataAsStringFromAssets));
+                  subscriber.onCompleted();
                 }
               }
+            } catch (JSONException e) {
+              new AppErrorHandler(e);
             }
-        );
+            if (!subscriber.isUnsubscribed()) {
+              AppLog.debug(logTag, "before emitting next result");
+              subscriber.onNext(movieList);
+              subscriber.onCompleted();
+            }
+          }
+        });
+
+    subscription = observable.subscribeOn(Schedulers.io()).subscribe(
+        new Observer<ArrayList<MovieItem>>() {
+          @Override public void onCompleted() {
+            AppLog.debug(logTag, "in onCompleted()");
+            if (movieList != null) {
+              moviesRecyclerAdapter.notifyDataSetChanged();
+            } else {
+              AppLog.debug(logTag, "Received movieItemsList is null");
+            }
+            subscription.unsubscribe();
+          }
+
+          @Override public void onError(Throwable e) {
+            AppLog.debug(logTag, "in onError()");
+            new AppErrorHandler(e);
+          }
+
+          @Override public void onNext(ArrayList<MovieItem> arrayList) {
+            if (arrayList != null) {
+              movieList = arrayList;
+            }
+            AppLog.debug(logTag, "in onNext()");
+          }
+        }
+    );
   }
 
   private int getImageViewWidth() {
@@ -141,5 +165,12 @@ public class MoviesListingFragment extends Fragment {
     }
     AppLog.debug(logTag, "movieList.size():" + movieList.size());
     return movieList;
+  }
+
+  @Override public void onDestroyView() {
+    if (!subscription.isUnsubscribed()) {
+      subscription.unsubscribe();
+    }
+    super.onDestroyView();
   }
 }
