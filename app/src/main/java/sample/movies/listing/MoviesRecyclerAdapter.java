@@ -19,6 +19,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
 import java.util.Queue;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import sample.movies.listing.data.MovieItem;
 import sample.movies.listing.databinding.MovieItemBinding;
 import sample.movies.listing.log.AppLog;
@@ -35,6 +37,8 @@ class MoviesRecyclerAdapter extends RecyclerView.Adapter<MoviesRecyclerAdapter.V
   private final String logTag = this.getClass().getSimpleName();
   private WeakReference<MoviesListingActivity> activityReference;
   private Queue<Integer> loadMediaQueue;
+  //to limit number of simultaneously running threads
+  private ExecutorService bitmapRequestThreadPool = Executors.newFixedThreadPool(1);
 
   MoviesRecyclerAdapter(List<MovieItem> movieList, Context context, int imageWidth) {
     this.movieList = movieList;
@@ -225,8 +229,8 @@ class MoviesRecyclerAdapter extends RecyclerView.Adapter<MoviesRecyclerAdapter.V
       }
     };
     Thread thread = new Thread(fetchImageBitmap);
-    // TODO limit simultaneous threads
-    thread.start();
+    // let executor service limit and handle simultaneously running threads.
+    bitmapRequestThreadPool.submit(thread);
   }
 
   private String getFilePath(String posterLink) {
