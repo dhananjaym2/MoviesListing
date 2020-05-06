@@ -205,7 +205,7 @@ class MoviesRecyclerAdapter extends RecyclerView.Adapter<MoviesRecyclerAdapter.V
   private void fetchImageBitmap(@NonNull final ViewHolder holder, final int position,
       final MovieItem movieItem) {
     Single.fromCallable(new Callable<Object>() {
-      @Override public Object call() throws Exception {
+      @Override public Object call() {
         return new IndexWithBitmap(position, tiffFileReader.read(
             getFilePath(movieItem.getPosterLink()), imageWidth, imageHeight));
       }
