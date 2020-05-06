@@ -1,6 +1,7 @@
 package sample.movies.listing;
 
 import android.content.Context;
+import android.graphics.Bitmap;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -18,11 +19,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
 import java.util.Queue;
-import java.util.concurrent.Callable;
-import rx.Single;
-import rx.android.schedulers.AndroidSchedulers;
-import rx.functions.Action1;
-import rx.schedulers.Schedulers;
 import sample.movies.listing.data.MovieItem;
 import sample.movies.listing.databinding.MovieItemBinding;
 import sample.movies.listing.log.AppLog;
@@ -204,32 +200,33 @@ class MoviesRecyclerAdapter extends RecyclerView.Adapter<MoviesRecyclerAdapter.V
 
   private void fetchImageBitmap(@NonNull final ViewHolder holder, final int position,
       final MovieItem movieItem) {
-    Single.fromCallable(new Callable<Object>() {
-      @Override public Object call() {
-        return new IndexWithBitmap(position, tiffFileReader.read(
-            getFilePath(movieItem.getPosterLink()), imageWidth, imageHeight));
-      }
-    }).subscribeOn(Schedulers.computation())
-        .observeOn(AndroidSchedulers.mainThread())
-        .subscribe(
-            new Action1<Object>() {
-              @Override public void call(Object object) {
-                if (object instanceof IndexWithBitmap) {
-                  IndexWithBitmap indexWithBitmapObj = (IndexWithBitmap) object;
-                  if (indexWithBitmapObj.getIndexPosition()
-                      == (int) holder.posterImageView.getTag()) {
-                    // correct bitmap is for this position, so we can show it.
-                    holder.posterImageView.setImageBitmap(((IndexWithBitmap) object).getBitmap());
-                  } else {
-                    AppLog.debug(logTag, "Position doesn't match of received" +
-                        " indexWithBitmapObj with current value of holder.posterImageView.getTag()");
-                  }
-                } else {
-                  AppLog.debug(logTag, "Received object is NOT an instance of IndexWithBitmap");
-                }
+
+    Runnable fetchImageBitmap = new Runnable() {
+      @Override public void run() {
+        Bitmap bitmap = tiffFileReader.read(getFilePath(movieItem.getPosterLink()),
+            imageWidth, imageHeight);
+        // TODO cache bitmap with size
+        final IndexWithBitmap indexWithBitmap = new IndexWithBitmap(position,
+            bitmap);
+
+        if (activityReference != null) {
+          activityReference.get().runOnUiThread(new Runnable() {
+            @Override public void run() {
+              if (indexWithBitmap.getIndexPosition() == (int) holder.posterImageView.getTag()) {
+                // correct bitmap is for this position, so we can show it.
+                holder.posterImageView.setImageBitmap(indexWithBitmap.getBitmap());
+              } else {
+                AppLog.debug(logTag, "Position doesn't match of received" +
+                    " indexWithBitmap with current value of holder.posterImageView.getTag()");
               }
             }
-        );
+          });
+        }
+      }
+    };
+    Thread thread = new Thread(fetchImageBitmap);
+    // TODO limit simultaneous threads
+    thread.start();
   }
 
   private String getFilePath(String posterLink) {

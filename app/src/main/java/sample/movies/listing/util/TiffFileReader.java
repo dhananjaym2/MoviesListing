@@ -3,8 +3,11 @@ package sample.movies.listing.util;
 import android.graphics.Bitmap;
 import java.io.File;
 import org.beyka.tiffbitmapfactory.TiffBitmapFactory;
+import sample.movies.listing.log.AppLog;
 
 public class TiffFileReader {
+
+  private String logTag = this.getClass().getSimpleName();
 
   public Bitmap read(String filePath, int requiredWidth, int requiredHeight) {
     File file = new File(filePath);
@@ -41,6 +44,7 @@ public class TiffFileReader {
 
       // Specify the amount of memory available for the final bitmap and temporary storage.
       options.inAvailableMemory = 20000000; // bytes
+      AppLog.debug(logTag, "inAvailableMemory:" + options.inAvailableMemory);
 
       return TiffBitmapFactory.decodeFile(file, options);
     }
