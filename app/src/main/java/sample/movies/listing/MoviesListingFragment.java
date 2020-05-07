@@ -19,7 +19,6 @@ public class MoviesListingFragment extends Fragment {
   private ArrayList<MovieItem> movieList = new ArrayList<>();
   private final String logTag = this.getClass().getSimpleName();
   private FragmentMoviesListingBinding binding;
-  private RecyclerView moviesRecyclerView;
   private MoviesRecyclerAdapter moviesRecyclerAdapter;
 
   @Override
@@ -41,7 +40,7 @@ public class MoviesListingFragment extends Fragment {
   private void initView(@NonNull View view) {
     moviesRecyclerAdapter =
         new MoviesRecyclerAdapter(movieList, requireActivity());
-    moviesRecyclerView = view.findViewById(R.id.moviesRecyclerView);
+    RecyclerView moviesRecyclerView = view.findViewById(R.id.moviesRecyclerView);
     moviesRecyclerView.setLayoutManager(
         new LinearLayoutManager(requireActivity(), LinearLayoutManager.VERTICAL, false));
     binding.moviesRecyclerView.setAdapter(moviesRecyclerAdapter);

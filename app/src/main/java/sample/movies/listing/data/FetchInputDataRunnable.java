@@ -12,8 +12,8 @@ import sample.movies.listing.log.AppLog;
 import sample.movies.listing.util.FileUtils;
 
 public class FetchInputDataRunnable implements Runnable {
-  private String logTag = this.getClass().getSimpleName();
-  private WeakReference<MoviesListingActivity> activityReference;
+  private final String logTag = this.getClass().getSimpleName();
+  private final WeakReference<MoviesListingActivity> activityReference;
 
   public FetchInputDataRunnable(FragmentActivity fragmentActivity) {
     activityReference = new WeakReference<>((MoviesListingActivity) fragmentActivity);

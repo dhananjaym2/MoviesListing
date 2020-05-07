@@ -32,9 +32,9 @@ class MoviesRecyclerAdapter
   private int imageHeight;
   private final TiffFileReader tiffFileReader;
   private final String logTag = this.getClass().getSimpleName();
-  private WeakReference<MoviesListingActivity> activityReference;
+  private final WeakReference<MoviesListingActivity> activityReference;
   //to limit number of simultaneously running threads
-  private ExecutorService bitmapRequestThreadPool = Executors.newFixedThreadPool(1);
+  private final ExecutorService bitmapRequestThreadPool = Executors.newFixedThreadPool(1);
 
   MoviesRecyclerAdapter(List<MovieItem> movieList, Context context) {
     this.movieList = movieList;
@@ -104,7 +104,6 @@ class MoviesRecyclerAdapter
     holder.posterImageView.setLayoutParams(imageLayoutParams);
     // set a unique tag for each item.
     holder.posterImageView.setTag(position);
-    //loadMediaQueue.add(position);
     // clear previous image.
     holder.posterImageView.setImageBitmap(null);
     // read the bitmap asynchronously on non UI thread and later set it in the image view
@@ -182,14 +181,12 @@ class MoviesRecyclerAdapter
   static class MovieItemViewHolder extends RecyclerView.ViewHolder {
 
     final MovieItemBinding itemRowBinding;
-    final ConstraintLayout movieItemParentConstraintLayout;
     final ImageView posterImageView;
     final TextView nameTextView;
 
     MovieItemViewHolder(@NonNull MovieItemBinding itemRowBinding) {
       super(itemRowBinding.getRoot());
       this.itemRowBinding = itemRowBinding;
-      movieItemParentConstraintLayout = itemRowBinding.movieItemParentConstraintLayout;
       nameTextView = itemRowBinding.nameTextView;
       posterImageView = itemRowBinding.posterImageView;
     }

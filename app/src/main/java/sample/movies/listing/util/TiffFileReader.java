@@ -7,7 +7,7 @@ import sample.movies.listing.log.AppLog;
 
 public class TiffFileReader {
 
-  private String logTag = this.getClass().getSimpleName();
+  private final String logTag = this.getClass().getSimpleName();
 
   public Bitmap read(String filePath, int requiredWidth, int requiredHeight) {
     File file = new File(filePath);
