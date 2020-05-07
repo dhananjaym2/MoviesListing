@@ -1,5 +1,6 @@
 package sample.movies.listing;
 
+import android.app.Activity;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -10,16 +11,12 @@ import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import java.io.IOException;
+import java.lang.ref.WeakReference;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import rx.Observable;
-import rx.Observer;
-import rx.Subscriber;
-import rx.Subscription;
-import rx.schedulers.Schedulers;
 import sample.movies.listing.data.MovieItem;
 import sample.movies.listing.data.constants.DataConstants;
 import sample.movies.listing.databinding.FragmentMoviesListingBinding;
@@ -36,7 +33,6 @@ public class MoviesListingFragment extends Fragment {
   private FragmentMoviesListingBinding binding;
   private RecyclerView moviesRecyclerView;
   private MoviesRecyclerAdapter moviesRecyclerAdapter;
-  private Subscription subscription;
 
   @Override
   public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
@@ -65,65 +61,9 @@ public class MoviesListingFragment extends Fragment {
 
   private void fetchData() {
 
-    Observable<ArrayList<MovieItem>> observable =
-        Observable.create(new Observable.OnSubscribe<ArrayList<MovieItem>>() {
-          @Override public void call(Subscriber<? super ArrayList<MovieItem>> subscriber) {
-            String dataAsStringFromAssets = null;
-            if (getActivity() != null) {
-              try {
-                dataAsStringFromAssets = FileUtils.readFileFromAssetsAsAString(getActivity(),
-                    "json/TestJSON.json", StandardCharsets.UTF_8);
-              } catch (IOException e) {
-                new AppErrorHandler(e);
-              }
-            } else {
-              AppLog.error(logTag, "getActivity() returns null");
-            }
-
-            try {
-              if (dataAsStringFromAssets != null) {
-                if (!subscriber.isUnsubscribed()) {
-                  AppLog.debug(logTag, "emit next result");
-                  subscriber.onNext(parseJsonFromString(dataAsStringFromAssets));
-                  subscriber.onCompleted();
-                }
-              }
-            } catch (JSONException e) {
-              new AppErrorHandler(e);
-            }
-            if (!subscriber.isUnsubscribed()) {
-              AppLog.debug(logTag, "before emitting error");
-              subscriber.onError(new Exception("Cannot load input data!"));
-              subscriber.onCompleted();
-            }
-          }
-        });
-
-    subscription = observable.subscribeOn(Schedulers.io()).subscribe(
-        new Observer<ArrayList<MovieItem>>() {
-          @Override public void onCompleted() {
-            AppLog.debug(logTag, "in onCompleted()");
-            if (movieList != null) {
-              moviesRecyclerAdapter.notifyDataSetChanged();
-            } else {
-              AppLog.debug(logTag, "Received movieItemsList is null");
-            }
-            subscription.unsubscribe();
-          }
-
-          @Override public void onError(Throwable e) {
-            AppLog.debug(logTag, "in onError()");
-            new AppErrorHandler(e);
-          }
-
-          @Override public void onNext(ArrayList<MovieItem> arrayList) {
-            if (arrayList != null) {
-              movieList = arrayList;
-            }
-            AppLog.debug(logTag, "in onNext()");
-          }
-        }
-    );
+    Runnable fetchInputData = new FetchDataRunnable(requireActivity());
+    Thread thread = new Thread(fetchInputData);
+    thread.start();
   }
 
   private int getImageViewWidth() {
@@ -167,10 +107,46 @@ public class MoviesListingFragment extends Fragment {
     return movieList;
   }
 
-  @Override public void onDestroyView() {
-    if (!subscription.isUnsubscribed()) {
-      subscription.unsubscribe();
+  private class FetchDataRunnable implements Runnable {
+
+    private WeakReference<MoviesListingActivity> activityReference;
+
+    FetchDataRunnable(Activity activity) {
+      activityReference = new WeakReference<>((MoviesListingActivity) activity);
     }
-    super.onDestroyView();
+
+    @Override public void run() {
+
+      String dataAsStringFromAssets = null;
+      if (activityReference.get() != null) {
+        try {
+          dataAsStringFromAssets = FileUtils.readFileFromAssetsAsAString(activityReference.get(),
+              "json/TestJSON.json", StandardCharsets.UTF_8);
+        } catch (IOException e) {
+          new AppErrorHandler(e);
+        }
+      } else {
+        AppLog.error(logTag, "activityReference.get() is null, can't read data from assets");
+      }
+
+      try {
+        if (dataAsStringFromAssets != null) {
+          parseJsonFromString(dataAsStringFromAssets);
+        } else {
+          AppLog.error(logTag, "dataAsStringFromAssets is null");
+        }
+      } catch (JSONException e) {
+        new AppErrorHandler(e);
+      }
+      if (activityReference != null) {
+        activityReference.get().runOnUiThread(new Runnable() {
+          @Override public void run() {
+            moviesRecyclerAdapter.notifyDataSetChanged();
+          }
+        });
+      } else {
+        AppLog.error(logTag, "activityReference.get() is null, can't notify adapter¬");
+      }
+    }
   }
 }
