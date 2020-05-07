@@ -41,4 +41,8 @@ public class AppLog {
   public static void debug(String logTag, String message) {
     log(Log.DEBUG, logTag, message);
   }
+
+  public static void verbose(String logTag, String message) {
+    log(Log.VERBOSE, logTag, message);
+  }
 }

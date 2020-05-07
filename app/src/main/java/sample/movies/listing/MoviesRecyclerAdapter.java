@@ -207,6 +207,12 @@ class MoviesRecyclerAdapter extends RecyclerView.Adapter<MoviesRecyclerAdapter.V
 
     Runnable fetchImageBitmap = new Runnable() {
       @Override public void run() {
+        if (position != (int) holder.posterImageView.getTag()) {
+          // if position and tag don't match then wrong bitmap might be loaded, so ignore it.
+          AppLog.warn(logTag, "position: " + position + " doesn't match tag:"
+              + holder.posterImageView.getTag());
+          return;
+        }
         Bitmap bitmap = tiffFileReader.read(getFilePath(movieItem.getPosterLink()),
             imageWidth, imageHeight);
         // TODO cache bitmap with size
@@ -218,6 +224,8 @@ class MoviesRecyclerAdapter extends RecyclerView.Adapter<MoviesRecyclerAdapter.V
             @Override public void run() {
               if (indexWithBitmap.getIndexPosition() == (int) holder.posterImageView.getTag()) {
                 // correct bitmap is for this position, so we can show it.
+                AppLog.verbose(logTag, "position: " + position +
+                    " matches the tag of received: " + holder.posterImageView.getTag());
                 holder.posterImageView.setImageBitmap(indexWithBitmap.getBitmap());
               } else {
                 AppLog.debug(logTag, "Position doesn't match of received" +
