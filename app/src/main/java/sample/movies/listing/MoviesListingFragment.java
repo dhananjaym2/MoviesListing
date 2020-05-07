@@ -23,7 +23,6 @@ import sample.movies.listing.databinding.FragmentMoviesListingBinding;
 import sample.movies.listing.errorHandling.AppErrorHandler;
 import sample.movies.listing.log.AppLog;
 import sample.movies.listing.util.DateTimeUtils;
-import sample.movies.listing.util.DimensionUtils;
 import sample.movies.listing.util.FileUtils;
 
 public class MoviesListingFragment extends Fragment {
@@ -52,40 +51,36 @@ public class MoviesListingFragment extends Fragment {
 
   private void initView(@NonNull View view) {
     moviesRecyclerAdapter =
-        new MoviesRecyclerAdapter(movieList, getActivity(), getImageViewWidth());
+        new MoviesRecyclerAdapter(movieList, requireActivity());
     moviesRecyclerView = view.findViewById(R.id.moviesRecyclerView);
     moviesRecyclerView.setLayoutManager(
-        new LinearLayoutManager(getActivity(), LinearLayoutManager.VERTICAL, false));
+        new LinearLayoutManager(requireActivity(), LinearLayoutManager.VERTICAL, false));
     binding.moviesRecyclerView.setAdapter(moviesRecyclerAdapter);
   }
 
   private void fetchData() {
-
-    Runnable fetchInputData = new FetchDataRunnable(requireActivity());
+    Runnable fetchInputData = new FetchInputDataRunnable(requireActivity());
     Thread thread = new Thread(fetchInputData);
     thread.start();
-  }
-
-  private int getImageViewWidth() {
-    return DimensionUtils.getDeviceWidth(requireActivity()) / 2;
   }
 
   private ArrayList<MovieItem> parseJsonFromString(String jsonDataAsString) throws JSONException {
     AppLog.debug(logTag, "in parseJsonFromString():");
     JSONObject json = new JSONObject(jsonDataAsString);
+    ArrayList<MovieItem> movieItemsArrayList = new ArrayList<>();
 
     if (json.has(DataConstants.testData)) {
       JSONArray jsonArray = json.optJSONArray(DataConstants.testData);
 
       if (jsonArray == null) {
         AppLog.warn(logTag, String.format("jsonArray is null from: %s", DataConstants.testData));
-        return movieList;
+        return movieItemsArrayList;
       }
 
       for (int index = 0; index < jsonArray.length(); index++) {
         JSONObject movieJsonObject = jsonArray.optJSONObject(index);
 
-        movieList.add(
+        movieItemsArrayList.add(
             new MovieItem(
                 movieJsonObject.optString(DataConstants.name),
                 movieJsonObject.optString(DataConstants.payment_plan),
@@ -103,21 +98,23 @@ public class MoviesListingFragment extends Fragment {
         );
       }
     }
-    AppLog.debug(logTag, "movieList.size():" + movieList.size());
-    return movieList;
+    AppLog.debug(logTag, "movieItemsArrayList.size():" + movieItemsArrayList.size());
+    return movieItemsArrayList;
   }
 
-  private class FetchDataRunnable implements Runnable {
+  private class FetchInputDataRunnable implements Runnable {
 
     private WeakReference<MoviesListingActivity> activityReference;
 
-    FetchDataRunnable(Activity activity) {
+    FetchInputDataRunnable(Activity activity) {
       activityReference = new WeakReference<>((MoviesListingActivity) activity);
     }
 
     @Override public void run() {
-
       String dataAsStringFromAssets = null;
+      ArrayList<MovieItem> movieItemsList = new ArrayList<>();
+
+      // read input data
       if (activityReference.get() != null) {
         try {
           dataAsStringFromAssets = FileUtils.readFileFromAssetsAsAString(activityReference.get(),
@@ -129,18 +126,23 @@ public class MoviesListingFragment extends Fragment {
         AppLog.error(logTag, "activityReference.get() is null, can't read data from assets");
       }
 
+      // parse the data
       try {
         if (dataAsStringFromAssets != null) {
-          parseJsonFromString(dataAsStringFromAssets);
+          movieItemsList = parseJsonFromString(dataAsStringFromAssets);
         } else {
           AppLog.error(logTag, "dataAsStringFromAssets is null");
         }
       } catch (JSONException e) {
         new AppErrorHandler(e);
       }
-      if (activityReference != null) {
+
+      // update the UI with the new data.
+      if (activityReference.get() != null) {
+        final ArrayList<MovieItem> finalMovieItemsList = movieItemsList;
         activityReference.get().runOnUiThread(new Runnable() {
           @Override public void run() {
+            movieList.addAll(finalMovieItemsList);
             moviesRecyclerAdapter.notifyDataSetChanged();
           }
         });
