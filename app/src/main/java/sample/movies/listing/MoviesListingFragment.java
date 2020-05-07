@@ -92,8 +92,8 @@ public class MoviesListingFragment extends Fragment {
               new AppErrorHandler(e);
             }
             if (!subscriber.isUnsubscribed()) {
-              AppLog.debug(logTag, "before emitting next result");
-              subscriber.onNext(movieList);
+              AppLog.debug(logTag, "before emitting error");
+              subscriber.onError(new Exception("Cannot load input data!"));
               subscriber.onCompleted();
             }
           }
