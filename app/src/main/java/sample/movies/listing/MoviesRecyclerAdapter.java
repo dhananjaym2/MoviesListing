@@ -7,6 +7,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.ListView;
+import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.databinding.DataBindingUtil;
@@ -68,7 +69,7 @@ class MoviesRecyclerAdapter
         DataBindingUtil.inflate(LayoutInflater.from(parent.getContext()), R.layout.movie_item,
             parent, false);
     imageWidth = parent.getWidth() / 2;
-    imageHeight = (int) (imageWidth * 0.94); // 4828 / 5181 = 0.94
+    imageHeight = (int) (imageWidth * 0.94); // 4828 / 5181 = 0.94 ratio of image dimensions
     return new MovieItemViewHolder(binding);
   }
 
@@ -95,26 +96,12 @@ class MoviesRecyclerAdapter
    */
   @Override public void onBindViewHolder(@NonNull MovieItemViewHolder holder, int position) {
     final MovieItem movieItem = movieList.get(position);
-    //ConstraintSet constraintSet = new ConstraintSet();
-    //constraintSet.connect(R.id.nameTextView, ConstraintSet.BOTTOM, R.id.posterImageView,
-    //    ConstraintSet.TOP);
-    //constraintSet.connect(R.id.posterImageView, ConstraintSet.TOP, R.id.nameTextView,
-    //    ConstraintSet.BOTTOM/*, 0*/);
-    //constraintSet.connect(R.id.posterImageView, ConstraintSet.START, ConstraintSet.PARENT_ID,
-    //    ConstraintSet.START);
-    //constraintSet.connect(R.id.posterImageView, ConstraintSet.BOTTOM, R.id.nameTextView,
-    //    ConstraintSet.TOP);
-    //constraintSet.connect(R.id.posterImageView, ConstraintSet.START, ConstraintSet.PARENT_ID,
-    //    ConstraintSet.START);
-    //constraintSet.connect(R.id.nameTextView, ConstraintSet.TOP, ConstraintSet.PARENT_ID,
-    //    ConstraintSet.TOP);
-    //constraintSet.applyTo(
-    //    holder.movieItemParentConstraintLayout);//IllegalArgumentException: right to top undefined
-    ConstraintLayout.LayoutParams layoutParams = new ConstraintLayout.LayoutParams(imageWidth,
-        imageHeight);
-    //layoutParams.topMargin = 100;
-    //layoutParams.constraintTopToBottomOf()
-    holder.posterImageView.setLayoutParams(layoutParams);
+    ConstraintLayout.LayoutParams imageLayoutParams =
+        (ConstraintLayout.LayoutParams) holder.posterImageView.getLayoutParams();
+    imageLayoutParams.topToBottom = holder.nameTextView.getId();
+    imageLayoutParams.width = imageWidth;
+    imageLayoutParams.height = imageHeight;
+    holder.posterImageView.setLayoutParams(imageLayoutParams);
     // set a unique tag for each item.
     holder.posterImageView.setTag(position);
     //loadMediaQueue.add(position);
@@ -197,11 +184,13 @@ class MoviesRecyclerAdapter
     final MovieItemBinding itemRowBinding;
     final ConstraintLayout movieItemParentConstraintLayout;
     final ImageView posterImageView;
+    final TextView nameTextView;
 
     MovieItemViewHolder(@NonNull MovieItemBinding itemRowBinding) {
       super(itemRowBinding.getRoot());
       this.itemRowBinding = itemRowBinding;
       movieItemParentConstraintLayout = itemRowBinding.movieItemParentConstraintLayout;
+      nameTextView = itemRowBinding.nameTextView;
       posterImageView = itemRowBinding.posterImageView;
     }
 

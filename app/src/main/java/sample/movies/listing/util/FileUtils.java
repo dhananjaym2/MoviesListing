@@ -34,7 +34,8 @@ public class FileUtils {
     AssetManager am = context.getAssets();
     InputStream inputStream;
     try {
-      inputStream = am.open("img/" + "TestImage.tif");// same file is used TestImage.tif
+      // to reduce the final APK build file, same TestImage.tif file is reused
+      inputStream = am.open("img/" + "TestImage.tif");
       //context.getExternalFilesDir(null)
       return createFileFromInputStream(context.getFilesDir(), fileName, inputStream);
     } catch (IOException e) {
