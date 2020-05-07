@@ -137,9 +137,7 @@ class MoviesRecyclerAdapter
               + holder.posterImageView.getTag());
           return;
         }
-        Bitmap bitmap = tiffFileReader.read(getFilePath(movieItem.getPosterLink()),
-            imageWidth, imageHeight);
-        // TODO cache bitmap with size
+        Bitmap bitmap = getBitmap(movieItem.getPosterLink(), imageWidth, imageHeight);
         final IndexWithBitmap indexWithBitmap = new IndexWithBitmap(position,
             bitmap);
 
@@ -165,8 +163,21 @@ class MoviesRecyclerAdapter
     bitmapRequestThreadPool.submit(thread);
   }
 
-  private String getFilePath(String posterLink) {
-    return Objects.requireNonNull(FileUtils.getFileFromAssets(context, posterLink))
+  private Bitmap getBitmap(String posterLinkUrl, int imageWidth, int imageHeight) {
+    Bitmap bitmap;
+    // get the bitmap from cache if the image file exists with the same dimensions
+    if (FileUtils.isFileCached(posterLinkUrl, imageWidth, imageHeight, context)) {
+      bitmap = FileUtils.readBitmapFromCachedFile(posterLinkUrl, imageWidth, imageHeight, context);
+    } else {
+      bitmap = tiffFileReader.read(getFilePath(posterLinkUrl), imageWidth, imageHeight);
+      // save/cache bitmap to a file
+      FileUtils.saveBitmapToDiskCache(bitmap, posterLinkUrl, imageWidth, imageHeight, context);
+    }
+    return bitmap;
+  }
+
+  private String getFilePath(String fileNameInAssets) {
+    return Objects.requireNonNull(FileUtils.getFileFromAssets(context, fileNameInAssets))
         .getAbsolutePath();
   }
 
