@@ -8,17 +8,13 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.ListView;
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.constraintlayout.widget.ConstraintSet;
 import androidx.databinding.DataBindingUtil;
 import androidx.recyclerview.widget.RecyclerView;
 import java.lang.ref.WeakReference;
-import java.util.Collection;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
-import java.util.Queue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import sample.movies.listing.data.MovieItem;
@@ -36,7 +32,6 @@ class MoviesRecyclerAdapter extends RecyclerView.Adapter<MoviesRecyclerAdapter.V
   private final TiffFileReader tiffFileReader;
   private final String logTag = this.getClass().getSimpleName();
   private WeakReference<MoviesListingActivity> activityReference;
-  private Queue<Integer> loadMediaQueue;
   //to limit number of simultaneously running threads
   private ExecutorService bitmapRequestThreadPool = Executors.newFixedThreadPool(1);
 
@@ -47,79 +42,6 @@ class MoviesRecyclerAdapter extends RecyclerView.Adapter<MoviesRecyclerAdapter.V
     imageHeight = (int) (imageWidth * 0.94); // 4828 / 5181 = 0.94
     tiffFileReader = new TiffFileReader();
     activityReference = new WeakReference<>((MoviesListingActivity) context);
-    loadMediaQueue = new Queue<Integer>() {
-      @Override public boolean add(Integer integer) {
-        return false;
-      }
-
-      @Override public boolean offer(Integer integer) {
-        return false;
-      }
-
-      @Override public Integer remove() {
-        return null;
-      }
-
-      @Nullable @Override public Integer poll() {
-        return null;
-      }
-
-      @Override public Integer element() {
-        return null;
-      }
-
-      @Nullable @Override public Integer peek() {
-        return null;
-      }
-
-      @Override public int size() {
-        return 0;
-      }
-
-      @Override public boolean isEmpty() {
-        return false;
-      }
-
-      @Override public boolean contains(@Nullable Object o) {
-        return false;
-      }
-
-      @NonNull @Override public Iterator<Integer> iterator() {
-        return null;
-      }
-
-      @NonNull @Override public Object[] toArray() {
-        return new Object[0];
-      }
-
-      @NonNull @Override public <T> T[] toArray(@NonNull T[] ts) {
-        return null;
-      }
-
-      @Override public boolean remove(@Nullable Object o) {
-        return false;
-      }
-
-      @Override public boolean containsAll(@NonNull Collection<?> collection) {
-        return false;
-      }
-
-      @Override public boolean addAll(@NonNull Collection<? extends Integer> collection) {
-        return false;
-      }
-
-      @Override public boolean removeAll(@NonNull Collection<?> collection) {
-        return false;
-      }
-
-      @Override public boolean retainAll(@NonNull Collection<?> collection) {
-        return false;
-      }
-
-      @Override public void clear() {
-
-      }
-    };
   }
 
   /**
