@@ -31,6 +31,7 @@
         android:layout_height="wrap_content"
         android:layout_marginBottom="@dimen/defaultSmallMarginForViewsInMovieItem"
         android:text="@{movieItem.name}"
+        android:textAppearance="@android:style/TextAppearance.Medium"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         tools:text="@string/Name"
