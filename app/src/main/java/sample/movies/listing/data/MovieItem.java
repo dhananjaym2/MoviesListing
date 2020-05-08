@@ -55,7 +55,7 @@ public class MovieItem implements Parcelable {
     this.description = description;
   }
 
-  protected MovieItem(Parcel in) {
+  private MovieItem(Parcel in) {
     name = in.readString();
     payment_plan = in.readString();
     release_year = in.readInt();

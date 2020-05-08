@@ -14,10 +14,9 @@ import sample.movies.listing.data.FetchInputDataRunnable;
 import sample.movies.listing.data.MovieItem;
 import sample.movies.listing.databinding.FragmentMoviesListingBinding;
 
-public class MoviesListingFragment extends Fragment {
+@SuppressWarnings("WeakerAccess") public class MoviesListingFragment extends Fragment {
 
-  private ArrayList<MovieItem> movieList = new ArrayList<>();
-  private final String logTag = this.getClass().getSimpleName();
+  private final ArrayList<MovieItem> movieList = new ArrayList<>();
   private FragmentMoviesListingBinding binding;
   private MoviesRecyclerAdapter moviesRecyclerAdapter;
   private final String savedInputDataBundleKey = "savedInputDataBundleKey";
@@ -34,9 +33,7 @@ public class MoviesListingFragment extends Fragment {
     super.onSaveInstanceState(outState);
     // save the input data to be shown in recycler view
     // useful when the app configuration changes like screen size or orientation is changed
-    if (movieList != null) {
-      outState.putParcelableArrayList(savedInputDataBundleKey, movieList);
-    }
+    outState.putParcelableArrayList(savedInputDataBundleKey, movieList);
   }
 
   public void onViewCreated(@NonNull View view, Bundle savedInstanceState) {
@@ -72,9 +69,7 @@ public class MoviesListingFragment extends Fragment {
   void updateInputDataResult(final ArrayList<MovieItem> movieItems) {
     requireActivity().runOnUiThread(new Runnable() {
       @Override public void run() {
-        if (movieList != null) {
-          movieList.addAll(movieItems);
-        }
+        movieList.addAll(movieItems);
         if (moviesRecyclerAdapter != null) {
           moviesRecyclerAdapter.notifyDataSetChanged();
         }

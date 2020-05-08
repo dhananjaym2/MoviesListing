@@ -79,8 +79,7 @@ public class FileUtils {
   }
 
   private static String getCacheFilePathString(@NonNull String fileName, int imageWidth,
-      int imageHeight,
-      @NonNull Context context) {
+      int imageHeight, @NonNull Context context) {
     return context.getCacheDir().getPath() + "/" + imageWidth + "/" + imageHeight + "/" + fileName;
   }
 
