@@ -34,7 +34,9 @@ class MoviesRecyclerAdapter
   private final String logTag = this.getClass().getSimpleName();
   private final WeakReference<MoviesListingActivity> activityReference;
   //to limit number of simultaneously running threads
-  private final ExecutorService bitmapRequestThreadPool = Executors.newFixedThreadPool(1);
+  private final ExecutorService cacheCheckThreadPool = Executors.newFixedThreadPool(1);
+  private final ExecutorService bitmapFromCacheThreadPool = Executors.newFixedThreadPool(1);
+  private final ExecutorService bitmapFromTifThreadPool = Executors.newFixedThreadPool(1);
 
   MoviesRecyclerAdapter(List<MovieItem> movieList, Context context) {
     this.movieList = movieList;
@@ -114,51 +116,66 @@ class MoviesRecyclerAdapter
   private void fetchImageBitmap(@NonNull final MovieItemViewHolder holder, final int position,
       final MovieItem movieItem) {
 
-    Runnable fetchImageBitmap = new Runnable() {
+    Runnable checkCache = new Runnable() {
       @Override public void run() {
-        if (position != (int) holder.posterImageView.getTag()) {
+        if (position != (int) holder.posterImageView.getTag()) {//for safety check
           // if position and tag don't match then wrong bitmap might be loaded, so ignore it.
           AppLog.warn(logTag, "position: " + position + " doesn't match tag:"
               + holder.posterImageView.getTag());
           return;
         }
-        Bitmap bitmap = getBitmap(movieItem.getPosterLink(), imageWidth, imageHeight);
-        final IndexWithBitmap indexWithBitmap = new IndexWithBitmap(position,
-            bitmap);
 
-        if (activityReference.get() != null) {
-          activityReference.get().runOnUiThread(new Runnable() {
+        final Bitmap[] bitmap = new Bitmap[1];
+        if (FileUtils.isFileCached(movieItem.getPosterLink(), imageWidth, imageHeight, context)) {
+          Thread thread = new Thread() {
             @Override public void run() {
-              if (indexWithBitmap.getIndexPosition() == (int) holder.posterImageView.getTag()) {
-                // correct bitmap is for this position, so we can show it.
-                AppLog.verbose(logTag, "position: " + position +
-                    " matches the tag of received: " + holder.posterImageView.getTag());
-                holder.posterImageView.setImageBitmap(indexWithBitmap.getBitmap());
-              } else {
-                AppLog.debug(logTag, "Position doesn't match of received" +
-                    " indexWithBitmap with current value of holder.posterImageView.getTag()");
-              }
+              super.run();
+              bitmap[0] = FileUtils.readBitmapFromCachedFile(movieItem.getPosterLink(), imageWidth,
+                  imageHeight, context);
+              setImageBitmap(bitmap[0], position, holder);
             }
-          });
+          };
+          bitmapFromCacheThreadPool.submit(thread);
+        } else {
+          Thread thread = new Thread() {
+            @Override public void run() {
+              super.run();
+              bitmap[0] = tiffFileReader.read(getFilePath(movieItem.getPosterLink()), imageWidth,
+                  imageHeight);
+              setImageBitmap(bitmap[0], position, holder);
+              // save/cache bitmap to a file
+              FileUtils.saveBitmapToDiskCache(bitmap[0], movieItem.getPosterLink(), imageWidth,
+                  imageHeight, context);
+            }
+          };
+          // let executor service limit and handle simultaneously running threads.
+          bitmapFromTifThreadPool.submit(thread);
         }
       }
     };
-    Thread thread = new Thread(fetchImageBitmap);
-    // let executor service limit and handle simultaneously running threads.
-    bitmapRequestThreadPool.submit(thread);
+    Thread thread = new Thread(checkCache);
+    cacheCheckThreadPool.submit(thread);
   }
 
-  private Bitmap getBitmap(String posterLinkUrl, int imageWidth, int imageHeight) {
-    Bitmap bitmap;
-    // get the bitmap from cache if the image file exists with the same dimensions
-    if (FileUtils.isFileCached(posterLinkUrl, imageWidth, imageHeight, context)) {
-      bitmap = FileUtils.readBitmapFromCachedFile(posterLinkUrl, imageWidth, imageHeight, context);
-    } else {
-      bitmap = tiffFileReader.read(getFilePath(posterLinkUrl), imageWidth, imageHeight);
-      // save/cache bitmap to a file
-      FileUtils.saveBitmapToDiskCache(bitmap, posterLinkUrl, imageWidth, imageHeight, context);
+  private void setImageBitmap(Bitmap bitmap, final int position,
+      @NonNull final MovieItemViewHolder holder) {
+    final IndexWithBitmap indexWithBitmap = new IndexWithBitmap(position, bitmap);
+
+    if (activityReference.get() != null) {
+      activityReference.get().runOnUiThread(new Runnable() {
+        @Override public void run() {
+          if (indexWithBitmap.getIndexPosition() == (int) holder.posterImageView.getTag()) {
+            // correct bitmap is for this position, so we can show it.
+            AppLog.verbose(logTag, "position: " + position +
+                " matches the tag of received: " + holder.posterImageView.getTag());
+            holder.posterImageView.setImageBitmap(indexWithBitmap.getBitmap());
+          } else {
+            AppLog.debug(logTag, "Position doesn't match of received" +
+                " indexWithBitmap with current value of holder.posterImageView.getTag()");
+          }
+        }
+      });
     }
-    return bitmap;
   }
 
   private String getFilePath(String fileNameInAssets) {
