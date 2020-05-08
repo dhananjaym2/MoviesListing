@@ -1,9 +1,12 @@
 package sample.movies.listing.data;
 
+import android.os.Parcel;
+import android.os.Parcelable;
+
 /**
  * Model for each data of movie item to be displayed in the list.
  */
-public class MovieItem {
+public class MovieItem implements Parcelable {
 
   private final String name;
 
@@ -25,7 +28,19 @@ public class MovieItem {
 
   private final String description;
 
-  public MovieItem(String name, String payment_plan, int release_year, String
+  public static final Creator<MovieItem> CREATOR = new Creator<MovieItem>() {
+    @Override
+    public MovieItem createFromParcel(Parcel in) {
+      return new MovieItem(in);
+    }
+
+    @Override
+    public MovieItem[] newArray(int size) {
+      return new MovieItem[size];
+    }
+  };
+
+  MovieItem(String name, String payment_plan, int release_year, String
       video_duration, String type, String created_on, String updated_on, String posterLink,
       String shortDescription, String description) {
     this.name = name;
@@ -38,6 +53,38 @@ public class MovieItem {
     this.posterLink = posterLink;
     this.shortDescription = shortDescription;
     this.description = description;
+  }
+
+  protected MovieItem(Parcel in) {
+    name = in.readString();
+    payment_plan = in.readString();
+    release_year = in.readInt();
+    video_duration = in.readString();
+    type = in.readString();
+    created_on = in.readString();
+    updated_on = in.readString();
+    posterLink = in.readString();
+    shortDescription = in.readString();
+    description = in.readString();
+  }
+
+  @Override
+  public void writeToParcel(Parcel dest, int flags) {
+    dest.writeString(name);
+    dest.writeString(payment_plan);
+    dest.writeInt(release_year);
+    dest.writeString(video_duration);
+    dest.writeString(type);
+    dest.writeString(created_on);
+    dest.writeString(updated_on);
+    dest.writeString(posterLink);
+    dest.writeString(shortDescription);
+    dest.writeString(description);
+  }
+
+  @Override
+  public int describeContents() {
+    return 0;
   }
 
   public String getName() {

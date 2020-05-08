@@ -20,6 +20,7 @@ public class MoviesListingFragment extends Fragment {
   private final String logTag = this.getClass().getSimpleName();
   private FragmentMoviesListingBinding binding;
   private MoviesRecyclerAdapter moviesRecyclerAdapter;
+  private final String savedInputDataBundleKey = "savedInputDataBundleKey";
 
   @Override
   public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
@@ -29,12 +30,28 @@ public class MoviesListingFragment extends Fragment {
     return binding.getRoot();
   }
 
+  @Override public void onSaveInstanceState(@NonNull Bundle outState) {
+    super.onSaveInstanceState(outState);
+    // save the input data to be shown in recycler view
+    // useful when the app configuration changes like screen size or orientation is changed
+    if (movieList != null) {
+      outState.putParcelableArrayList(savedInputDataBundleKey, movieList);
+    }
+  }
+
   public void onViewCreated(@NonNull View view, Bundle savedInstanceState) {
     super.onViewCreated(view, savedInstanceState);
 
     initView(view);
 
-    fetchData();
+    if (savedInstanceState != null && savedInstanceState.containsKey(savedInputDataBundleKey)
+        && savedInstanceState.get(savedInputDataBundleKey) instanceof ArrayList) {
+      // use the saved input data to show in recycler view
+      updateInputDataResult(
+          savedInstanceState.<MovieItem>getParcelableArrayList(savedInputDataBundleKey));
+    } else {
+      fetchData();
+    }
   }
 
   private void initView(@NonNull View view) {
