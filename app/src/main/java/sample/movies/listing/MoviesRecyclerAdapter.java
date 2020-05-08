@@ -126,7 +126,7 @@ class MoviesRecyclerAdapter
         final IndexWithBitmap indexWithBitmap = new IndexWithBitmap(position,
             bitmap);
 
-        if (activityReference != null) {
+        if (activityReference.get() != null) {
           activityReference.get().runOnUiThread(new Runnable() {
             @Override public void run() {
               if (indexWithBitmap.getIndexPosition() == (int) holder.posterImageView.getTag()) {
