@@ -71,7 +71,7 @@ class MoviesRecyclerAdapter
         DataBindingUtil.inflate(LayoutInflater.from(parent.getContext()), R.layout.movie_item,
             parent, false);
     imageWidth = parent.getWidth() / 2;
-    imageHeight = (int) (imageWidth * 0.94); // 4828 / 5181 = 0.94 ratio of image dimensions
+    imageHeight = (int) (imageWidth * 0.94); // 4828 / 5181 = 0.94 i.e. ratio of image dimensions
     return new MovieItemViewHolder(binding);
   }
 
@@ -125,14 +125,13 @@ class MoviesRecyclerAdapter
           return;
         }
 
-        final Bitmap[] bitmap = new Bitmap[1];
         if (FileUtils.isFileCached(movieItem.getPosterLink(), imageWidth, imageHeight, context)) {
           Thread thread = new Thread() {
             @Override public void run() {
               super.run();
-              bitmap[0] = FileUtils.readBitmapFromCachedFile(movieItem.getPosterLink(), imageWidth,
-                  imageHeight, context);
-              setImageBitmap(bitmap[0], position, holder);
+              Bitmap bitmap = FileUtils.readBitmapFromCachedFile(movieItem.getPosterLink(),
+                  imageWidth, imageHeight, context);
+              setImageBitmap(bitmap, position, holder);
             }
           };
           bitmapFromCacheThreadPool.submit(thread);
@@ -140,11 +139,11 @@ class MoviesRecyclerAdapter
           Thread thread = new Thread() {
             @Override public void run() {
               super.run();
-              bitmap[0] = tiffFileReader.read(getFilePath(movieItem.getPosterLink()), imageWidth,
-                  imageHeight);
-              setImageBitmap(bitmap[0], position, holder);
+              Bitmap bitmap = tiffFileReader.read(getFilePath(movieItem.getPosterLink()),
+                  imageWidth, imageHeight);
+              setImageBitmap(bitmap, position, holder);
               // save/cache bitmap to a file
-              FileUtils.saveBitmapToDiskCache(bitmap[0], movieItem.getPosterLink(), imageWidth,
+              FileUtils.saveBitmapToDiskCache(bitmap, movieItem.getPosterLink(), imageWidth,
                   imageHeight, context);
             }
           };
