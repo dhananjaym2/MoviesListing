@@ -87,8 +87,13 @@ public class FileUtils {
     FileOutputStream out = null;
     try {
       if (!file.exists()) {
-        file.mkdirs();
+        if (!file.mkdirs()) {
+          new AppErrorHandler(
+              new Exception("Unable to create directory for cache: " + file.getPath()));
+          return;
+        }
       }
+      //delete the folder named with the fileName as it was created with file.mkdirs()
       file.delete();
       out = new FileOutputStream(file);
       // Use the compress method on the BitMap object to write image to the OutputStream
