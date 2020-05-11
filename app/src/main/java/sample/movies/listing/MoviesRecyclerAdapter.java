@@ -35,8 +35,7 @@ class MoviesRecyclerAdapter
   private final WeakReference<MoviesListingActivity> activityReference;
   //to limit number of simultaneously running threads
   private final ExecutorService cacheCheckThreadPool = Executors.newFixedThreadPool(1);
-  private final ExecutorService bitmapFromCacheThreadPool = Executors.newFixedThreadPool(1);
-  private final ExecutorService bitmapFromTifThreadPool = Executors.newFixedThreadPool(1);
+  private final ExecutorService saveBitmapFromTifThreadPool = Executors.newFixedThreadPool(1);
 
   MoviesRecyclerAdapter(List<MovieItem> movieList, Context context) {
     this.movieList = movieList;
@@ -126,29 +125,23 @@ class MoviesRecyclerAdapter
         }
 
         if (FileUtils.isFileCached(movieItem.getPosterLink(), imageWidth, imageHeight, context)) {
-          Thread thread = new Thread() {
-            @Override public void run() {
-              super.run();
-              Bitmap bitmap = FileUtils.readBitmapFromCachedFile(movieItem.getPosterLink(),
-                  imageWidth, imageHeight, context);
-              setImageBitmap(bitmap, position, holder);
-            }
-          };
-          bitmapFromCacheThreadPool.submit(thread);
+          Bitmap bitmap = FileUtils.readBitmapFromCachedFile(movieItem.getPosterLink(),
+              imageWidth, imageHeight, context);
+          setImageBitmap(bitmap, position, holder);
         } else {
+          final Bitmap bitmap = tiffFileReader.read(getFilePath(movieItem.getPosterLink()),
+              imageWidth, imageHeight);
+          setImageBitmap(bitmap, position, holder);
           Thread thread = new Thread() {
             @Override public void run() {
               super.run();
-              Bitmap bitmap = tiffFileReader.read(getFilePath(movieItem.getPosterLink()),
-                  imageWidth, imageHeight);
-              setImageBitmap(bitmap, position, holder);
               // save/cache bitmap to a file
               FileUtils.saveBitmapToDiskCache(bitmap, movieItem.getPosterLink(), imageWidth,
                   imageHeight, context);
             }
           };
           // let executor service limit and handle simultaneously running threads.
-          bitmapFromTifThreadPool.submit(thread);
+          saveBitmapFromTifThreadPool.submit(thread);
         }
       }
     };
