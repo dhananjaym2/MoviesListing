@@ -74,6 +74,12 @@ class MoviesRecyclerAdapter
     return new MovieItemViewHolder(binding);
   }
 
+  //@Override public void onViewDetachedFromWindow(@NonNull MovieItemViewHolder holder) {
+  //  super.onViewDetachedFromWindow(holder);
+  //  holder.posterImageView.getTag();
+  //  // TODO (optimize): interrupt thread, when the tag doesn't match position, as view is detached
+  //}
+
   /**
    * Called by RecyclerView to display the data at the specified position. This method should
    * update the contents of the {@link MovieItemViewHolder#itemView} to reflect the item at the
