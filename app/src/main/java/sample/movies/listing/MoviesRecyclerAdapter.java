@@ -21,6 +21,7 @@ import sample.movies.listing.data.MovieItem;
 import sample.movies.listing.databinding.MovieItemBinding;
 import sample.movies.listing.log.AppLog;
 import sample.movies.listing.pojo.IndexWithBitmap;
+import sample.movies.listing.pojo.IndexWithThread;
 import sample.movies.listing.util.FileUtils;
 import sample.movies.listing.util.TiffFileReader;
 
@@ -74,11 +75,20 @@ class MoviesRecyclerAdapter
     return new MovieItemViewHolder(binding);
   }
 
-  //@Override public void onViewDetachedFromWindow(@NonNull MovieItemViewHolder holder) {
-  //  super.onViewDetachedFromWindow(holder);
-  //  holder.posterImageView.getTag();
-  //  // TODO (optimize): interrupt thread, when the tag doesn't match position, as view is detached
-  //}
+  @Override public void onViewDetachedFromWindow(@NonNull MovieItemViewHolder holder) {
+    super.onViewDetachedFromWindow(holder);
+    IndexWithThread indexWithThread = (IndexWithThread) holder.posterImageView.getTag();
+    if (indexWithThread != null) {
+      Thread thread = indexWithThread.getThread();
+      if (thread != null && thread.isAlive()) {
+        // interrupt thread, when the tag doesn't match position, as view is detached.
+        AppLog.verbose(logTag, "Interrupting thread:" + thread.getId());
+        thread.interrupt();
+        // Tested by clearing app data and fast scrolling even in different orientations, but need
+        // to check why this code is NOT called. TODO
+      }
+    }
+  }
 
   /**
    * Called by RecyclerView to display the data at the specified position. This method should
@@ -109,8 +119,6 @@ class MoviesRecyclerAdapter
     imageLayoutParams.width = imageWidth;
     imageLayoutParams.height = imageHeight;
     holder.posterImageView.setLayoutParams(imageLayoutParams);
-    // set a unique tag for each item.
-    holder.posterImageView.setTag(position);
     // clear previous image.
     holder.posterImageView.setImageBitmap(null);
     // read the bitmap asynchronously on non UI thread and later set it in the image view
@@ -123,10 +131,10 @@ class MoviesRecyclerAdapter
 
     Runnable checkCache = new Runnable() {
       @Override public void run() {
-        if (position != (int) holder.posterImageView.getTag()) {//for safety check
+        int index = ((IndexWithThread) holder.posterImageView.getTag()).getIndex();
+        if (position != index) {//for safety check
           // if position and tag don't match then wrong bitmap might be loaded, so ignore it.
-          AppLog.warn(logTag, "position: " + position + " doesn't match tag:"
-              + holder.posterImageView.getTag());
+          AppLog.warn(logTag, "position: " + position + " doesn't match tag:" + index);
           return;
         }
 
@@ -152,6 +160,8 @@ class MoviesRecyclerAdapter
       }
     };
     Thread thread = new Thread(checkCache);
+    // set a unique tag for each item.
+    holder.posterImageView.setTag(new IndexWithThread(position, thread));
     cacheCheckThreadPool.submit(thread);
   }
 
@@ -162,14 +172,15 @@ class MoviesRecyclerAdapter
     if (activityReference.get() != null) {
       activityReference.get().runOnUiThread(new Runnable() {
         @Override public void run() {
-          if (indexWithBitmap.getIndexPosition() == (int) holder.posterImageView.getTag()) {
+          int index = ((IndexWithThread) holder.posterImageView.getTag()).getIndex();
+          if (indexWithBitmap.getIndexPosition() == index) {
             // correct bitmap is for this position, so we can show it.
             AppLog.verbose(logTag, "position: " + position +
-                " matches the tag of received: " + holder.posterImageView.getTag());
+                " matches the tag of received: " + index);
             holder.posterImageView.setImageBitmap(indexWithBitmap.getBitmap());
           } else {
             AppLog.debug(logTag, "Position doesn't match of received" +
-                " indexWithBitmap with current value of holder.posterImageView.getTag()");
+                " indexWithBitmap with current value of index in holder.posterImageView.getTag()");
           }
         }
       });
